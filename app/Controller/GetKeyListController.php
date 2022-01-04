@@ -1,7 +1,14 @@
 <?php
 
 declare(strict_types=1);
-
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace App\Controller;
 
 use App\Model\Entity;
@@ -12,12 +19,11 @@ use App\Model\Status;
 class GetKeyListController extends AbstractController
 {
     public function __construct(
-        Entity  $entityModel,
-        Keys    $keysModel,
+        Entity $entityModel,
+        Keys $keysModel,
         KeyType $keyTypeModel,
-        Status  $statusModel
-    )
-    {
+        Status $statusModel
+    ) {
         parent::__construct();
         $this->entityModel = $entityModel;
         $this->keysModel = $keysModel;
@@ -41,10 +47,9 @@ class GetKeyListController extends AbstractController
             $items = $this->keysModel::where('entity_id', $user->id)->get();
 
             return $this->flatKeyTypes($validatedData['userType'], array_values($items->toArray()));
-
         } catch (\Throwable $exception) {
             var_dump($exception);
-            die();
+            exit();
         }
     }
 
@@ -56,7 +61,7 @@ class GetKeyListController extends AbstractController
         }
 
         $keyArray = array_map(
-            static fn($type) => ['type' => 'unregistered_key', 'attributes' => ['keyType' => $type,]],
+            static fn ($type) => ['type' => 'unregistered_key', 'attributes' => ['keyType' => $type]],
             $types
         );
 
@@ -66,8 +71,8 @@ class GetKeyListController extends AbstractController
 
         foreach ($keyArray as $attributes) {
             if (
-                ($userType === 'person' && count($items) < 5) ||
-                ($userType === 'company' && count($items) < 10)
+                ($userType === 'person' && count($items) < 5)
+                || ($userType === 'company' && count($items) < 10)
             ) {
                 $newKeyArray[$countKey] = $attributes;
             }
@@ -76,35 +81,27 @@ class GetKeyListController extends AbstractController
 
                 if ($keyType->name === $attributes['attributes']['keyType']) {
                     $newKeyArray[$countKey] = $key;
-                    $countKey++;
+                    ++$countKey;
                     if ($keyType->name === 'random') {
                         $hasRandom = true;
                     }
                 }
             }
-            $countKey++;
+            ++$countKey;
         }
 
         if (
-            $hasRandom === true &&
-            (
-                ($userType === 'person' && count($items) < 5) ||
-                ($userType === 'company' && count($items) < 10)
+            $hasRandom === true
+            && (
+                ($userType === 'person' && count($items) < 5)
+                || ($userType === 'company' && count($items) < 10)
             )
         ) {
-            $newKeyArray[] = ['type' => 'unregistered_key', 'attributes' => ['keyType' => 'random',]];
+            $newKeyArray[] = ['type' => 'unregistered_key', 'attributes' => ['keyType' => 'random']];
         }
-
 
         $order = ['cpf', 'cnpj', 'phone', 'email', 'random'];
 
-        usort($newKeyArray, function ($a, $b) use ($order) {
-            $pos_a = array_search($a['attributes']['keyType'], $order);
-            $pos_b = array_search($b['attributes']['keyType'], $order);
-            return $pos_a - $pos_b;
-        });
-
         return ['data' => array_values($newKeyArray)];
     }
-
 }
