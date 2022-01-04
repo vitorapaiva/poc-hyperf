@@ -11,16 +11,6 @@ services:
       - ./:/app
     ports:
       - 9501:9501
-    depends_on:
-      - hyperf-skeleton-redis
-    networks:
-      - bubble
-
-  hyperf-skeleton-redis:
-    container_name: hyperf-skeleton-redis
-    image: redis:latest
-    ports:
-      - 6379:6379
     networks:
       - bubble
 

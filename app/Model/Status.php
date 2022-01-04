@@ -13,5 +13,5 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Status extends Model
 {
-    protected string $table = 'status';
+    protected $table = 'status';
 }

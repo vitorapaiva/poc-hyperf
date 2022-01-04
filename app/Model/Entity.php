@@ -14,5 +14,5 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Entity extends Model
 {
-    protected string $table = 'entities';
+    protected $table = 'entities';
 }

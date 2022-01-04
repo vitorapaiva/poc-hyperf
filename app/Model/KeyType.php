@@ -13,5 +13,5 @@ use Hyperf\DbConnection\Model\Model;
  */
 class KeyType extends Model
 {
-    protected string $table = 'key_types';
+    protected $table = 'key_types';
 }

@@ -18,5 +18,5 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Keys extends Model
 {
-    protected string $table = 'keys';
+    protected $table = 'keys';
 }
