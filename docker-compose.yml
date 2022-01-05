@@ -2,15 +2,21 @@ version: '3.9'
 
 services:
 
-  hyperf-skeleton:
-    container_name: hyperf-skeleton
-    image: hyperf/hyperf:8.0-alpine-v3.14-swoole
+  image:
+    container_name: poc-pix-hyperf.image
+    image: poc-pix-hyperf
+    command: list
+    build: .
+
+  app:
+    container_name: poc-pix-hyperf.app
+    image: poc-pix-hyperf
     working_dir: /app
-    entrypoint: ["php", "bin/hyperf.php", "server:watch"]
+    entrypoint: ["php", "bin/hyperf.php", "start"]
     volumes:
       - ./:/app
     ports:
-      - 9501:9501
+      - '9501:9501'
     networks:
       - bubble
 

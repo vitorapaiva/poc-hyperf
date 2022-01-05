@@ -1,107 +1,18 @@
-<?php
+<?php declare(strict_types=1);
 
-declare(strict_types=1);
-/**
- * This file is part of Hyperf.
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
- */
 namespace App\Controller;
 
-use App\Model\Entity;
-use App\Model\Keys;
-use App\Model\KeyType;
-use App\Model\Status;
+use App\Service;
+use Hyperf\HttpServer\Contract\RequestInterface;
 
-class GetKeyListController extends AbstractController
+class GetKeyListController
 {
     public function __construct(
-        Entity $entityModel,
-        Keys $keysModel,
-        KeyType $keyTypeModel,
-        Status $statusModel
-    ) {
-        parent::__construct();
-        $this->entityModel = $entityModel;
-        $this->keysModel = $keysModel;
-        $this->keyTypeModel = $keyTypeModel;
-        $this->statusModel = $statusModel;
-    }
+        private Service $service,
+    ) {}
 
-    public function index(): array
+    public function index(RequestInterface $request): array
     {
-        try {
-            $validatedData = $this->request->all();
-
-            if (empty($validatedData['userId']) || empty($validatedData['userType'])) {
-                throw new \Exception('campos invalidos');
-            }
-
-            $user = $this->entityModel::where('entity_identifier', $validatedData['userId'])
-                ->where('entity_Type', $validatedData['userType'])
-                ->first();
-
-            $items = $this->keysModel::where('entity_id', $user->id)->get();
-
-            return $this->flatKeyTypes($validatedData['userType'], array_values($items->toArray()));
-        } catch (\Throwable $exception) {
-            var_dump($exception);
-            exit();
-        }
-    }
-
-    private function flatKeyTypes(string $userType, array $items): array
-    {
-        $types = ['random', 'phone', 'email', 'cpf'];
-        if ($userType === 'company') {
-            $types = ['random', 'phone', 'email', 'cnpj'];
-        }
-
-        $keyArray = array_map(
-            static fn ($type) => ['type' => 'unregistered_key', 'attributes' => ['keyType' => $type]],
-            $types
-        );
-
-        $countKey = 0;
-        $newKeyArray = [];
-        $hasRandom = false;
-
-        foreach ($keyArray as $attributes) {
-            if (
-                ($userType === 'person' && count($items) < 5)
-                || ($userType === 'company' && count($items) < 10)
-            ) {
-                $newKeyArray[$countKey] = $attributes;
-            }
-            foreach ($items as $key) {
-                $keyType = $this->keyTypeModel::where('id', $key['key_type_id'])->first();
-
-                if ($keyType->name === $attributes['attributes']['keyType']) {
-                    $newKeyArray[$countKey] = $key;
-                    ++$countKey;
-                    if ($keyType->name === 'random') {
-                        $hasRandom = true;
-                    }
-                }
-            }
-            ++$countKey;
-        }
-
-        if (
-            $hasRandom === true
-            && (
-                ($userType === 'person' && count($items) < 5)
-                || ($userType === 'company' && count($items) < 10)
-            )
-        ) {
-            $newKeyArray[] = ['type' => 'unregistered_key', 'attributes' => ['keyType' => 'random']];
-        }
-
-        $order = ['cpf', 'cnpj', 'phone', 'email', 'random'];
-
-        return ['data' => array_values($newKeyArray)];
+        return $this->service->index($request);
     }
 }

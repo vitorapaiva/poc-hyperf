@@ -24,15 +24,5 @@ abstract class AbstractController
      */
     protected $container;
 
-    /**
-     * @Inject
-     * @var RequestInterface
-     */
-    protected $request;
 
-    /**
-     * @Inject
-     * @var ResponseInterface
-     */
-    protected $response;
 }
